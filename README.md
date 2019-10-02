@@ -12,9 +12,9 @@ _TODO_
 
 ### Features (planned/implemented)
 
-- [x] Release cleanup (remove releases based on different filters)  
-- [] Repo backup and sync (backup one/more/all repositories and sync them)  
-- [] Full backup and sync (same as repo backup, but with support for backing up issues etc.)  
+- [x] Release cleanup (remove releases based on different filters)
+- [ ] Repo backup and sync (backup one/more/all repositories and sync them)
+- [ ] Full backup and sync (same as repo backup, but with support for backing up issues etc.)
 
 ### Development
 
