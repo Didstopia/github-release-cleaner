@@ -8,9 +8,9 @@ A multi-purpose command line tool for GitHub.
 
 ### Usage
 
-_TODO_
+_Coming soon(ish)_
 
-### Features (planned/implemented)
+### Features (planned vs. implemented)
 
 - [x] Release cleanup (remove releases based on different filters)
 - [ ] Repo backup and sync (backup one/more/all repositories and sync them)

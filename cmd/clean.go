@@ -15,14 +15,14 @@ import (
 	pb "gopkg.in/cheggaaa/pb.v1"
 )
 
+// GitHubRepository is the target GitHub repository
+var GitHubRepository string
+
 // FilterDays sets the maximum amount of days since release
 var FilterDays int64
 
 // FilterCount sets the maximum amount of releases to keep
 var FilterCount int64
-
-// The progress bar (only used when running non-verbosely)
-var progressBar *pb.ProgressBar
 
 var cleanCmd = &cobra.Command{
 	Use:   "clean",
@@ -44,7 +44,7 @@ var cleanCmd = &cobra.Command{
 		}
 
 		// Validate the repository
-		owner, repo, err := util.ValidateGitHubRepository(Repository)
+		owner, repo, err := util.ValidateGitHubRepository(GitHubRepository)
 		if err != nil {
 			fmt.Println("Error:", err)
 			os.Exit(1)
@@ -55,7 +55,7 @@ var cleanCmd = &cobra.Command{
 		}
 
 		// Create a new GitHub client
-		client, err := ghapi.NewGitHub(Token)
+		client, err := ghapi.NewGitHub(GitHubToken)
 		if err != nil {
 			fmt.Println("Error:", err)
 			os.Exit(1)
@@ -156,7 +156,6 @@ var cleanCmd = &cobra.Command{
 				err := client.RemoveRelease(owner, repo, release)
 				if err != nil {
 					fmt.Println("Error deleting release:", err)
-					//os.Exit(1)
 				} else {
 					if Verbose {
 						fmt.Println("Successfully deleted release at", release.CreatedAt)
@@ -166,7 +165,7 @@ var cleanCmd = &cobra.Command{
 				if Verbose {
 					fmt.Println("Dry run enabled, simulating cleanup")
 				}
-				time.Sleep(time.Duration(100) * time.Millisecond)
+				time.Sleep(time.Duration(250) * time.Millisecond)
 			}
 
 			// Increment the progress bar

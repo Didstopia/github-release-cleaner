@@ -3,6 +3,7 @@ package ghapi
 
 import (
 	"context"
+	"errors"
 
 	"github.com/google/go-github/v24/github"
 	"golang.org/x/oauth2"
@@ -31,8 +32,33 @@ func NewGitHub(token string) (*GitHub, error) {
 	return githubClient, nil
 }
 
+// GetRepositories returns all repositories for the supplied user or organization
+func (githubClient *GitHub) GetRepositories(owner string) ([]*github.Repository, error) {
+	// FIXME: Validate the owner using the GitHub client
+
+	repositories, err := githubClient.getAllRepositories(owner, 1, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	// log.Println("Got", len(repositories), "repositories total")
+
+	return repositories, nil
+}
+
+// BackupRepository will attempt to backup or sync a repository from GitHub
+func (githubClient *GitHub) BackupRepository(owner string, repository *github.Repository) error {
+	// TODO: Implement
+
+	// Return nil on success
+	return nil
+}
+
 // GetReleases returns all release information for the supplied repository
 func (githubClient *GitHub) GetReleases(owner string, repository string) ([]*github.RepositoryRelease, error) {
+	// FIXME: Validate the owner using the GitHub client
+	// FIXME: Validate the repository using the GitHub client
+
 	// Find all releases (handles pagination behind the scenes, starting at page 1)
 	releases, err := githubClient.getAllReleases(owner, repository, 1, nil)
 	if err != nil {
@@ -101,14 +127,54 @@ func (githubClient *GitHub) deleteTag(owner string, repo string, release *github
 		return doErr
 	}
 
-	//log.Println("Delete tag response:", res)
+	// log.Println("Delete tag response:", res)
 
 	// Return nil on success
 	return nil
 }
 
+func (githubClient *GitHub) getAllRepositories(owner string, page int, existingRepositories []*github.Repository) ([]*github.Repository, error) {
+	// log.Println("Getting repositories for page ", page)
+
+	// Create an array that will eventually contain all repositories
+	allRepositories := make([]*github.Repository, 0)
+
+	// Use existing repositories if necessary
+	if existingRepositories != nil {
+		allRepositories = existingRepositories
+	}
+
+	// Get repositories for the current page
+	opts := &github.RepositoryListOptions{}
+	opts.Page = page
+	opts.PerPage = 100
+	repositories, res, err := githubClient.client.Repositories.List(githubClient.ctx, owner, opts)
+	if err != nil {
+		return nil, err
+	}
+
+	// Add the current repositories
+	for _, repository := range repositories {
+		allRepositories = append(allRepositories, repository)
+	}
+
+	// Recursively move to the next page if there are any more pages left
+	if res.NextPage > 0 && res.NextPage > page {
+		// log.Println("Moving from page", page, "to", res.NextPage)
+		return githubClient.getAllRepositories(owner, res.NextPage, allRepositories)
+	}
+
+	// Return an error if we have no repositories
+	if allRepositories == nil || len(allRepositories) <= 0 {
+		return nil, errors.New("no repositories found")
+	}
+
+	// Return all repositories if we're done
+	return allRepositories, nil
+}
+
 func (githubClient *GitHub) getAllReleases(owner string, repository string, page int, existingReleases []*github.RepositoryRelease) ([]*github.RepositoryRelease, error) {
-	//log.Println("Getting releases for page ", page)
+	// log.Println("Getting releases for page ", page)
 
 	// Create an array that will eventually contain all releases
 	allReleases := make([]*github.RepositoryRelease, 0)
@@ -131,8 +197,13 @@ func (githubClient *GitHub) getAllReleases(owner string, repository string, page
 
 	// Recursively move to the next page if there are any more pages left
 	if res.NextPage > 0 && res.NextPage > page {
-		//log.Println("Moving from page", page, "to", res.NextPage)
+		// log.Println("Moving from page", page, "to", res.NextPage)
 		return githubClient.getAllReleases(owner, repository, res.NextPage, allReleases)
+	}
+
+	// Return an error if we have no releases
+	if allReleases == nil || len(allReleases) <= 0 {
+		return nil, errors.New("no releases found")
 	}
 
 	// Return all releases if we're done
