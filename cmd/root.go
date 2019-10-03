@@ -66,6 +66,12 @@ func init() {
 	// Add the "user" flag to the backup command
 	backupCmd.Flags().StringVarP(&GitHubUser, "user", "u", "", "GitHub user or organization (required)")
 	backupCmd.MarkFlagRequired("user")
+
+	// Add the "output" flag to the backup command
+	backupCmd.Flags().StringVarP(&BackupOutputPath, "output", "o", "", "Backup output path (defaults to current directory)")
+
+	// Add the "limit" flag to the backup command
+	backupCmd.Flags().IntVarP(&BackupLimit, "limit", "l", 0, "Limit the amount of backups (no limit by default)")
 }
 
 // Execute starts the Cobra commander, which in turn will handle execution and any arguments

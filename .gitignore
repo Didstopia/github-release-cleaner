@@ -1,6 +1,9 @@
 ### Code Coverage ###
 coverage.txt
 
+# Backups
+/github.com/
+
 ### Go ###
 # Binaries for programs and plugins
 *.exe

@@ -9,10 +9,17 @@ import (
 	"github.com/Didstopia/githubby/ghapi"
 	"github.com/spf13/cobra"
 	pb "gopkg.in/cheggaaa/pb.v1"
+	"gopkg.in/src-d/go-git.v4"
 )
 
 // GitHubUser is the GitHub user or organization
 var GitHubUser string
+
+// BackupOutputPath is the path where backups are stored
+var BackupOutputPath string
+
+// BackupLimit limits the amount of data to backup
+var BackupLimit int
 
 var backupCmd = &cobra.Command{
 	Use:   "backup",
@@ -23,7 +30,7 @@ var backupCmd = &cobra.Command{
 		progressEnabled := !Verbose
 
 		// Create a new GitHub client
-		client, err := ghapi.NewGitHub(GitHubToken)
+		client, err := ghapi.NewGitHub(GitHubToken, Verbose)
 		if err != nil {
 			fmt.Println("Error:", err)
 			os.Exit(1)
@@ -35,7 +42,7 @@ var backupCmd = &cobra.Command{
 		}
 
 		// Fetch all repositories for the user
-		repositories, err := client.GetRepositories(GitHubUser)
+		repositories, err := client.GetRepositories(GitHubUser, BackupLimit)
 		if err != nil {
 			fmt.Println("Error:", err)
 			os.Exit(1)
@@ -63,21 +70,45 @@ var backupCmd = &cobra.Command{
 			progressBar = pb.StartNew(len(repositories))
 		}
 
+		// Use the current directory as the default output path
+		if len(BackupOutputPath) == 0 {
+			BackupOutputPath, _ = os.Getwd() // TODO: Add error handling
+			if Verbose {
+				fmt.Println("Using default backup path:", BackupOutputPath)
+			}
+		}
+
 		// Loop through repositories and backup/sync them locally
 		for _, repository := range repositories {
+			// Format the repository details
+			repoName := *repository.Name
+			repoOwner := *repository.Owner
+			repoOwnerName := *repoOwner.Login
+			repoURL := "https://github.com/" + repoOwnerName + "/" + repoName
+
+			// Define the final backup location
+			backupPath := BackupOutputPath + "/github.com/" + repoOwnerName + "/" + repoName
+
 			if Verbose {
-				fmt.Println("Backing up repository", *repository.Name)
+				fmt.Println("Backing up repository from", repoURL, "to", backupPath)
 			}
 
 			// Remove the release
 			if !DryRun {
 				// If an error occurs, we'll simply log it and move on to the next one
-				err := client.BackupRepository(GitHubUser, repository)
+				err := client.BackupRepository(GitHubUser, GitHubToken, backupPath, repository, true)
 				if err != nil {
-					fmt.Println("Error backing up repository", *repository.Name+":", err)
+					if err == git.NoErrAlreadyUpToDate {
+						if Verbose {
+							fmt.Println("Repository already up to date:", repoURL)
+						}
+					} else {
+						fmt.Println("Error: Failed to backup repository from", repoURL+":", err)
+						// os.Exit(1)
+					}
 				} else {
 					if Verbose {
-						fmt.Println("Successfully backed up repository", *repository.Name)
+						fmt.Println("Successfully backed up repository from", repoURL)
 					}
 				}
 			} else {

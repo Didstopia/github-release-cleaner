@@ -10,7 +10,7 @@ import (
 
 	"github.com/Didstopia/githubby/ghapi"
 	"github.com/Didstopia/githubby/util"
-	"github.com/google/go-github/v24/github"
+	"github.com/google/go-github/v28/github"
 	"github.com/spf13/cobra"
 	pb "gopkg.in/cheggaaa/pb.v1"
 )
@@ -55,7 +55,7 @@ var cleanCmd = &cobra.Command{
 		}
 
 		// Create a new GitHub client
-		client, err := ghapi.NewGitHub(GitHubToken)
+		client, err := ghapi.NewGitHub(GitHubToken, Verbose)
 		if err != nil {
 			fmt.Println("Error:", err)
 			os.Exit(1)
