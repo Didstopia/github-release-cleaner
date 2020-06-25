@@ -14,31 +14,25 @@ matrix:
       - make test
       - make install
       - make uninstall
+  - go: 1.14.x
+    script:
+      - make deps
+      - make build
+      - make test
+      - make install
+      - make uninstall
+  - go: 1.13.x
+    script:
+      - make deps
+      - make build
+      - make test
+      - make install
+      - make uninstall
   - go: 1.12.x
-    script:
-      - make deps
-      - make build
-      - make test
-      - make install
-      - make uninstall
-  - go: 1.11.x
-    script:
-      - make deps
-      - make build
-      - make test
-      - make install
-      - make uninstall
-  - go: 1.10.x
     script:
       - make deps EXTRA_FLAGS=
       - make build EXTRA_FLAGS=
       - make test EXTRA_FLAGS=
-      - make install EXTRA_FLAGS=
-      - make uninstall EXTRA_FLAGS=
-  - go: 1.9.x
-    script:
-      - make deps EXTRA_FLAGS=
-      - make build EXTRA_FLAGS=
       - make install EXTRA_FLAGS=
       - make uninstall EXTRA_FLAGS=
 

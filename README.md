@@ -8,12 +8,16 @@ A multi-purpose command line tool for GitHub.
 
 ### Usage
 
-_Coming soon(ish)_
+Backing up repositories:
+> githubby --token \<GitHub API Token\> backup --user \<GitHub User or Organization\> --output \<local path for saving repositories\>
+
+Cleaning up releases:
+> githubby --token \<GitHub API Token\> clean --repository \<user/repository\> --filter-count \<keep this amount of releases\> --filter-days \<keep releases newer than this\>
 
 ### Features (planned vs. implemented)
 
 - [x] Release cleanup (remove releases based on different filters)
-- [ ] Repo backup and sync (backup one/more/all repositories and sync them)
+- [x] Repo backup and sync (backup one/more/all repositories and sync them)
 - [ ] Full backup and sync (same as repo backup, but with support for backing up issues etc.)
 
 ### Development
